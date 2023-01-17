@@ -1,0 +1,8 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb+srv://poalim-bit-task-bhaa:poalim-bit-task@cluster0.s0aocq0.mongodb.net/?retryWrites=true&w=majority
+      database: Cluster0
+number:
+  of:
+    lines: 10
