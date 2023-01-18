@@ -19,7 +19,7 @@ public class AggregationServiceImpl implements AggregationService {
 
     @Override
     public List<WordsResponseDto> aggregate() {
-        List<WordLocations> aggregate = wordsDatabaseOperationService.aggregate(Collections.emptyList());
+        List<WordLocations> aggregate = wordsDatabaseOperationService.groupLocationsByWord();
         List<WordsResponseDto> wordsResponseDtos = new ArrayList<>();
         aggregate.forEach(word -> {
             List<Location> locations = new ArrayList<>();

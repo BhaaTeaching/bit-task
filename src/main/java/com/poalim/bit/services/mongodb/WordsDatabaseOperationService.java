@@ -9,7 +9,7 @@ import java.util.List;
 public interface WordsDatabaseOperationService {
     List<WordDetails> save(Collection<WordDetails> wordDetails);
 
-    List<WordLocations> aggregate(List<String> words);
+    List<WordLocations> groupLocationsByWord();
 
     void deleteAll();
 }

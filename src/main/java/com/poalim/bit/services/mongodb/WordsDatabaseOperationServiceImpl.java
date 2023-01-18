@@ -20,7 +20,7 @@ public class WordsDatabaseOperationServiceImpl implements WordsDatabaseOperation
     }
 
     @Override
-    public List<WordLocations> aggregate(List<String> words) {
+    public List<WordLocations> groupLocationsByWord() {
         return wordLocationRepository.findWords();
     }
 
