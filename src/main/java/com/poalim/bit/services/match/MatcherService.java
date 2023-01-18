@@ -1,6 +1,5 @@
 package com.poalim.bit.services.match;
 
-import com.poalim.bit.controllers.dto.response.WordsResponseDto;
 import com.poalim.bit.models.WordDetails;
 
 import java.util.List;

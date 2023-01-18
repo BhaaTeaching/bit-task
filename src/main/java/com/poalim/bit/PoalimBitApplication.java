@@ -8,8 +8,8 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 @EnableMongoRepositories
 public class PoalimBitApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(PoalimBitApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(PoalimBitApplication.class, args);
+    }
 
 }

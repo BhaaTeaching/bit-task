@@ -5,10 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import java.util.List;
-import java.util.Map;
 
 @Data
 @AllArgsConstructor
 public class WordsResponseDto {
-    private Map<String, List<Location>> wordToAppearanceLocation;
+    private String word;
+    private List<Location> locations;
+//    private Map<String, List<Location>> wordToAppearanceLocation;
 }

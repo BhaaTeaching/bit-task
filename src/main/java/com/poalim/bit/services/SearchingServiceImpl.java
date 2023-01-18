@@ -10,13 +10,16 @@ import com.poalim.bit.services.reading.ReadTxtService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.stream.Stream;
 
 @Service
 @AllArgsConstructor
@@ -29,19 +32,25 @@ public class SearchingServiceImpl implements SearchingService {
     private final AggregationService aggregationService;
 
     @Override
-    public WordsResponseDto search(String textUrl, List<String> words) throws ExecutionException, InterruptedException, IOException {
+    public List<WordsResponseDto> search(String textUrl, List<String> words) throws ExecutionException, InterruptedException, IOException {
         bufferedReaderService.createBufferedReader(textUrl);
-        ExecutorService executorService = Executors.newFixedThreadPool(5);
+        URL url = new URL(textUrl);
+        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(url.openStream()));
+        ExecutorService executorService = Executors.newFixedThreadPool(1);
+        var ref = new Object() {
+            List<String> collect = null;
+        };
 
-        for (int i = 0; i < 10; i++) {
+        Stream<String> limit;
+        while (!(ref.collect = bufferedReader.lines().limit(1000).toList()).isEmpty()) {
             executorService.submit(() -> {
-                String text = readTxtService.read(textUrl);
-                Map<String, WordDetails> wordsToWordsDetails = matcherService.match(text, words);
+                Map<String, WordDetails> wordsToWordsDetails = matcherService.match(String.join("\n", ref.collect), words);
                 wordsDatabaseOperationService.save(wordsToWordsDetails.values());
             });
         }
 
-        //todo: after all threads end --> do aggregation
-            return aggregationService.aggregate();
+        List<WordsResponseDto> aggregatedData = aggregationService.aggregate();
+        aggregationService.clean();
+        return aggregatedData;
     }
 }

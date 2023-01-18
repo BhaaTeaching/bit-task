@@ -7,5 +7,5 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public interface SearchingService {
-    WordsResponseDto search(String textUrl, List<String> words) throws ExecutionException, InterruptedException, IOException;
+    List<WordsResponseDto> search(String textUrl, List<String> words) throws ExecutionException, InterruptedException, IOException;
 }
