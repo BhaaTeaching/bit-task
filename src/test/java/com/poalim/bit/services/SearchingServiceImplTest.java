@@ -59,7 +59,7 @@ public class SearchingServiceImplTest {
 
     @Test
     public void givenSearch_whenTextUrlIsValid_throwMatchTheWords() throws ValidationException, IOException {
-        when(matcherService.match(Mockito.anyString(), Mockito.anyList()))
+        when(matcherService.match(Mockito.anyString(), Mockito.anyList(), Mockito.anyInt()))
                 .thenReturn(Map.of("Project",
                         new WordDetails("Project", List.of(new Location(1, 5)), "thread-name", new Date())));
 

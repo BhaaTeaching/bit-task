@@ -6,33 +6,40 @@ import com.poalim.bit.models.WordDetails;
 import com.poalim.bit.services.aggregation.AggregationService;
 import com.poalim.bit.services.match.MatcherService;
 import com.poalim.bit.services.mongodb.WordsDatabaseOperationService;
-import com.poalim.bit.services.reading.BufferedReaderService;
-import com.poalim.bit.services.reading.ReadTxtService;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Stream;
+import java.util.stream.IntStream;
 
 @Service
-@AllArgsConstructor
 @Slf4j
 public class SearchingServiceImpl implements SearchingService {
+    @Value("${number.of.threads:1}")
+    private int numberOfLinesToRead;
 
-//    private final BufferedReaderService bufferedReaderService;
-//    private final ReadTxtService readTxtService;
+    @Value("${number.of.lines.per.part:1000}")
+    private int numberOfLinesPerPart;
     private final MatcherService matcherService;
     private final WordsDatabaseOperationService wordsDatabaseOperationService;
     private final AggregationService aggregationService;
+
+    public SearchingServiceImpl(MatcherService matcherService, WordsDatabaseOperationService wordsDatabaseOperationService, AggregationService aggregationService) {
+        this.matcherService = matcherService;
+        this.wordsDatabaseOperationService = wordsDatabaseOperationService;
+        this.aggregationService = aggregationService;
+    }
+
 
     @Override
     public List<WordsResponseDto> search(String textUrl, List<String> words) throws IOException, ValidationException {
@@ -42,17 +49,34 @@ public class SearchingServiceImpl implements SearchingService {
         }
         URL url = new URL(textUrl);
         BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(url.openStream()));
-        ExecutorService executorService = Executors.newFixedThreadPool(1);
+        ExecutorService executorService = Executors.newFixedThreadPool(numberOfLinesToRead);
         var ref = new Object() {
             List<String> collect = null;
         };
 
-        while (!(ref.collect = bufferedReader.lines().limit(1000).toList()).isEmpty()) {
-            executorService.submit(() -> {
-                Map<String, WordDetails> wordsToWordsDetails = matcherService.match(String.join("\n", ref.collect), words);
-                wordsDatabaseOperationService.save(wordsToWordsDetails.values());
+        int partNumber = 0;
+        while (!(ref.collect = bufferedReader.lines().limit(numberOfLinesPerPart).toList()).isEmpty()) {
+
+            List<Callable<List<WordDetails>>> callables = new LinkedList<>();
+            int finalPartNumber = partNumber;
+            IntStream.range(0, ref.collect.size()).forEach(index -> {
+                Callable<List<WordDetails>> callable = () -> {
+                    Map<String, WordDetails> wordsToWordsDetails = null;
+                    wordsToWordsDetails = matcherService.match(ref.collect.get(index), words, finalPartNumber * numberOfLinesPerPart + index);
+                    return wordsDatabaseOperationService.save(wordsToWordsDetails.values());
+                };
+                callables.add(callable);
             });
+
+            try {
+                executorService.invokeAll(callables);
+            } catch (InterruptedException interruptedException) {
+                log.error("Failed to invoke all callables, part number: {}, thread name: {}", partNumber, Thread.currentThread().getName(), interruptedException);
+                throw new RuntimeException(interruptedException);
+            }
+            partNumber++;
         }
+
 
         List<WordsResponseDto> aggregatedData = aggregationService.aggregate();
         aggregationService.clean();

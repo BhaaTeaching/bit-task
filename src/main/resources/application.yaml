@@ -5,4 +5,4 @@ spring:
       database: Cluster0
 number:
   of:
-    lines: 10
+    threads: 5

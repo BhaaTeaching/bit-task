@@ -6,5 +6,5 @@ import java.util.List;
 import java.util.Map;
 
 public interface MatcherService {
-    Map<String, WordDetails> match(String text, List<String> words);
+    Map<String, WordDetails> match(String text, List<String> words, int rowNumber);
 }

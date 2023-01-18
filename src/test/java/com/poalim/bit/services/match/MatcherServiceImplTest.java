@@ -17,7 +17,7 @@ public class MatcherServiceImplTest {
 
     @Test
     public void givenMatch_whenTextContainsWords_theReturnMapOfWordAndLocation() {
-        Map<String, WordDetails> actual = matcherService.match("Here test string \n test is good practice", List.of("test"));
+        Map<String, WordDetails> actual = matcherService.match("Here test string \n test is good practice", List.of("test"),1);
         Assertions.assertFalse(actual.isEmpty());
         Assertions.assertTrue(actual.containsKey("test"));
         Assertions.assertEquals(actual.get("test").getWord(), "test");
@@ -30,7 +30,7 @@ public class MatcherServiceImplTest {
 
     @Test
     public void givenMatch_whenTextNotContainsWords_theReturnMapWithNullAtLocation() {
-        Map<String, WordDetails> actual = matcherService.match("Here test string \n test is good practice", List.of("foo"));
+        Map<String, WordDetails> actual = matcherService.match("Here test string \n test is good practice", List.of("foo"),1);
         assertEquals(1, actual.size());
         Assertions.assertTrue(actual.containsKey("foo"));
         Assertions.assertNull(actual.get("foo"));
@@ -38,19 +38,19 @@ public class MatcherServiceImplTest {
 
     @Test
     public void givenMatch_whenTheWordsIsEmpty_theReturnEmptyMap() {
-        Map<String, WordDetails> actual = matcherService.match("Here test string \n test is good practice", Collections.emptyList());
+        Map<String, WordDetails> actual = matcherService.match("Here test string \n test is good practice", Collections.emptyList(),1);
         assertEquals(0, actual.size());
     }
 
     @Test
     public void givenMatch_whenTheWordsIsNull_theReturnEmptyMap() {
-        Map<String, WordDetails> actual = matcherService.match("Here test string \n test is good practice", null);
+        Map<String, WordDetails> actual = matcherService.match("Here test string \n test is good practice", null,1);
         assertEquals(0, actual.size());
     }
 
     @Test
     public void givenMatch_whenTheTextIsNull_theReturnEmptyMap() {
-        Map<String, WordDetails> actual = matcherService.match(null, Collections.emptyList());
+        Map<String, WordDetails> actual = matcherService.match(null, Collections.emptyList(),1);
         assertEquals(0, actual.size());
     }
 }

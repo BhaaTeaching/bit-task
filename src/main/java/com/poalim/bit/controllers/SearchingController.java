@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 @RestController
 @AllArgsConstructor
@@ -20,7 +19,7 @@ public class SearchingController {
     private final SearchingService searchingService;
 
     @PostMapping("/text-analysis/match")
-    public ResponseEntity<List<WordsResponseDto>> searchWords(@RequestBody TextRequestDto textRequestDto) throws IOException, ValidationException {
+    public ResponseEntity<List<WordsResponseDto>> searchWords(@RequestBody TextRequestDto textRequestDto) throws IOException, ValidationException, InterruptedException {
         List<WordsResponseDto> response = searchingService.search(textRequestDto.getTextUrl(), textRequestDto.getWords());
         return ResponseEntity.ok(response);
     }
